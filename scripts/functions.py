@@ -19,10 +19,10 @@ class robot:
     def __init__(self, name):
         self.assigned_point = []
         self.name = name
-        self.global_frame = rospy.get_param('~global_frame', '/map')
+        self.global_frame = rospy.get_param('~global_frame', 'map')
         self.robot_frame = rospy.get_param('~robot_frame', 'base_link')
         self.plan_service = rospy.get_param(
-            '~plan_service', '/move_base_node/NavfnROS/make_plan')
+            '~plan_service', '/move_base/GlobalPlanner/make_plan')
         self.listener = tf.TransformListener()
         self.listener.waitForTransform(
             self.global_frame, self.name+'/'+self.robot_frame, rospy.Time(0), rospy.Duration(10.0))
@@ -40,7 +40,7 @@ class robot:
         self.client = actionlib.SimpleActionClient(
             self.name+'/move_base', MoveBaseAction)
         self.client.wait_for_server()
-        robot.goal.target_pose.header.frame_id = self.global_frame
+        robot.goal.target_pose.header.frame_id = 'map'
         robot.goal.target_pose.header.stamp = rospy.Time.now()
 
         rospy.wait_for_service(self.name+self.plan_service)
@@ -80,9 +80,10 @@ class robot:
         robot.start.pose.position.y = start[1]
         robot.end.pose.position.x = end[0]
         robot.end.pose.position.y = end[1]
-        start = self.listener.transformPose(self.name+'/map', robot.start)
-        end = self.listener.transformPose(self.name+'/map', robot.end)
+        start = self.listener.transformPose(self.name+'map', robot.start)
+        end = self.listener.transformPose(self.name+'map', robot.end)
         plan = self.make_plan(start=start, goal=end, tolerance=0.0)
+        rospy.loginfo("make plan")
         return plan.plan.poses
 # ________________________________________________________________________________
 
@@ -100,9 +101,9 @@ def index_of_point(mapData, Xp):
 
 def point_of_index(mapData, i):
     y = mapData.info.origin.position.y + \
-        (i/mapData.info.width)*mapData.info.resolution
+        int(i/mapData.info.width)*mapData.info.resolution
     x = mapData.info.origin.position.x + \
-        (i-(i/mapData.info.width)*(mapData.info.width))*mapData.info.resolution
+        (i-int(i/mapData.info.width)*(mapData.info.width))*mapData.info.resolution
     return array([x, y])
 # ________________________________________________________________________________
 
@@ -204,8 +205,7 @@ def gridValue(mapData, Xp):
     Data = mapData.data
     # returns grid value at "Xp" location
     # map data:  100 occupied      -1 unknown       0 free
-    index = (floor((Xp[1]-Xstarty)/resolution)*width) + \
-        (floor((Xp[0]-Xstartx)/resolution))
+    index = (floor((Xp[1]-Xstarty)/resolution)*width) + (floor((Xp[0]-Xstartx)/resolution))
 
     if int(index) < len(Data):
         return Data[int(index)]

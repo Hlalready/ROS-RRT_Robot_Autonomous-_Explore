@@ -61,8 +61,7 @@ def node():
     namespace = rospy.get_param('~namespace', '')
     namespace_init_count = rospy.get_param('namespace_init_count', 1)
     rateHz = rospy.get_param('~rate', 100)
-    global_costmap_topic = rospy.get_param(
-        '~global_costmap_topic', '/move_base_node/global_costmap/costmap')
+    global_costmap_topic = rospy.get_param('~global_costmap_topic', '/move_base/global_costmap/costmap')
     robot_frame = rospy.get_param('~robot_frame', 'base_link')
 
     litraIndx = len(namespace)
@@ -78,8 +77,9 @@ def node():
 
     if len(namespace) > 0:
         for i in range(0, n_robots):
-            rospy.Subscriber(namespace+str(i+namespace_init_count) +
-                             global_costmap_topic, OccupancyGrid, globalMap)
+            # rospy.Subscriber(namespace+str(i+namespace_init_count) +
+            #                  global_costmap_topic, OccupancyGrid, globalMap)
+            rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMap)                             
     elif len(namespace) == 0:
         rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMap)
 # wait if map is not received yet
@@ -90,7 +90,7 @@ def node():
 # wait if any of robots' global costmap map is not received yet
     for i in range(0, n_robots):
         while (len(globalmaps[i].data) < 1):
-            rospy.loginfo('Waiting for the global costmap')
+            rospy.loginfo('Waiting for the global costmap!!!')
             rospy.sleep(0.1)
             pass
 
@@ -187,7 +187,9 @@ def node():
         # -------------------------------------------------------------------------
         # Clustering frontier points
         centroids = []
+        # print("global frontiers",frontiers)
         front = copy(frontiers)
+        # print("front",front)
         if len(front) > 1:
             ms = MeanShift(bandwidth=0.3)
             ms.fit(front)
@@ -205,20 +207,19 @@ def node():
             cond = False
             temppoint.point.x = centroids[z][0]
             temppoint.point.y = centroids[z][1]
-
             for i in range(0, n_robots):
-
-                transformedPoint = tfLisn.transformPoint(
-                    globalmaps[i].header.frame_id, temppoint)
+                transformedPoint = tfLisn.transformPoint(globalmaps[i].header.frame_id, temppoint)
                 x = array([transformedPoint.point.x, transformedPoint.point.y])
                 cond = (gridValue(globalmaps[i], x) > threshold) or cond
             if (cond or (informationGain(mapData, [centroids[z][0], centroids[z][1]], info_radius*0.5)) < 0.2):
                 centroids = delete(centroids, (z), axis=0)
                 z = z-1
             z += 1
+        # rospy.loginfo(z)            
 # -------------------------------------------------------------------------
 # publishing
         arraypoints.points = []
+        # print(centroids)
         for i in centroids:
             tempPoint.x = i[0]
             tempPoint.y = i[1]
