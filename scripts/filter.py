@@ -187,9 +187,7 @@ def node():
         # -------------------------------------------------------------------------
         # Clustering frontier points
         centroids = []
-        # print("global frontiers",frontiers)
         front = copy(frontiers)
-        # print("front",front)
         if len(front) > 1:
             ms = MeanShift(bandwidth=0.3)
             ms.fit(front)
