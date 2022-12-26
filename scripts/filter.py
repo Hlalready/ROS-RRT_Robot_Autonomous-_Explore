@@ -38,8 +38,8 @@ def globalMap(data):
     global global1, globalmaps, litraIndx, namespace_init_count, n_robots
     global1 = data
     if n_robots > 1:
-        indx = int(data._connection_header['topic']
-                   [litraIndx])-namespace_init_count
+        # print(data._connection_header['topic'],data._connection_header['topic'][litraIndx])-namespace_init_count
+        indx = int(data._connection_header['topic'][litraIndx+1])-namespace_init_count
     elif n_robots == 1:
         indx = 0
     globalmaps[indx] = data
@@ -59,7 +59,7 @@ def node():
     goals_topic = rospy.get_param('~goals_topic', '/detected_points')
     n_robots = rospy.get_param('~n_robots', 1)
     namespace = rospy.get_param('~namespace', '')
-    namespace_init_count = rospy.get_param('namespace_init_count', 1)
+    namespace_init_count = rospy.get_param('namespace_init_count', 0)
     rateHz = rospy.get_param('~rate', 100)
     global_costmap_topic = rospy.get_param('~global_costmap_topic', '/move_base/global_costmap/costmap')
     robot_frame = rospy.get_param('~robot_frame', 'base_link')
@@ -77,9 +77,9 @@ def node():
 
     if len(namespace) > 0:
         for i in range(0, n_robots):
-            # rospy.Subscriber(namespace+str(i+namespace_init_count) +
-            #                  global_costmap_topic, OccupancyGrid, globalMap)
-            rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMap)                             
+            rospy.Subscriber(namespace+str(i+namespace_init_count) +
+                             global_costmap_topic, OccupancyGrid, globalMap)
+            # rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMap)                             
     elif len(namespace) == 0:
         rospy.Subscriber(global_costmap_topic, OccupancyGrid, globalMap)
 # wait if map is not received yet
