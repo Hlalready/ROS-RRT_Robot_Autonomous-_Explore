@@ -14,20 +14,20 @@
   
   <node pkg="rrt_exploration" type="local_rrt_detector" name="robot_0_local_detector" output="screen">
   <param name="eta" value="$(arg eta)"/>
-  <param name="map_topic" value="/map"/>
-  <param name="robot_frame" value="/robot_0/base_link"/>
+  <param name="map_topic" value="/robot_1/map"/>
+  <param name="robot_frame" value="/robot_0/base_footprint"/>
   </node>
 
   <node pkg="rrt_exploration" type="local_rrt_detector" name="robot_1_local_detector" output="screen">
   <param name="eta" value="$(arg eta)"/>
-  <param name="map_topic" value="/map"/>
-  <param name="robot_frame" value="/robot_1/base_link"/>
+  <param name="map_topic" value="/robot_1/map"/>
+  <param name="robot_frame" value="/robot_1/base_footprint"/>
   </node> 
 
   <node pkg="rrt_exploration" type="local_rrt_detector" name="robot_2_local_detector" output="screen">
   <param name="eta" value="$(arg eta)"/>
-  <param name="map_topic" value="/map"/>
-  <param name="robot_frame" value="/robot_2/base_link"/>
+  <param name="map_topic" value="/robot_2/map"/>
+  <param name="robot_frame" value="/robot_2/base_footprint"/>
   </node>
 
   
@@ -39,6 +39,7 @@
   <param name="namespace" value="robot_"/> 
   <param name="n_robots" value="3"/>
   <param name="rate" value="100"/>
+  <param name="robot_frame" value="base_footprint"/>
   </node>
   
   <node pkg="rrt_exploration" type="assigner.py" name="assigner" output="screen">
@@ -53,6 +54,7 @@
   <param name="namespace" value="robot_"/>
   <param name="delay_after_assignement" value="0.5"/>
   <param name="rate" value="100"/>
+  <param name="robot_frame" value="base_footprint"/>
 
   </node>
   
